@@ -1,0 +1,6 @@
+#can tune the parameters directly from here
+data_collection:
+    test_size: 0.3
+
+model_building:
+    n_estimators: 1000
