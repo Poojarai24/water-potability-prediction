@@ -1,83 +1,57 @@
 import numpy as np
 import pandas as pd
-import json
-import pickle
-from sklearn.metrics import accuracy_score, precision_score, recall_score,f1_score
+import os 
+from sklearn.model_selection import train_test_split
+import yaml
 
-def load_data(filepath  : str) -> pd.DataFrame:
+def load_params(filepath : str) -> float:
     try:
-        return pd.read_csv(filepath)
+        with open(filepath, "r") as file:
+            params = yaml.safe_load(file)
+        return params["data_collection"]["test_size"]
     except Exception as e:
-        raise Exception(f"Error loading from {filepath} : {e}")
-# test_data= pd.read_csv('./data/processed/test_processed.csv')
+        raise Exception(f"Error loading filepath from {filepath}:{e}")
 
-#fetching independent data
-#X_test= test_data.iloc[:, 0:-1].values
-#fetching dependent data
-#y_test=test_data.iloc[:,-1].values
+#test_size = yaml.safe_load(open("params.yaml"))["data_collection"]["test_size"]
 
-def prepare_data(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
-    try:
-        X = data.drop(columns= ['Potability'])
-        y = data['Potability']
-        return X,y
-    except Exception as e:
-        raise Exception(f"Error preparing data: {e}")
-
-def load_model(filepath: str):
-    try:
-        with open(filepath, "rb") as file:
-            model= pickle.load(file)
-        return model
-    except Exception as e:
-        raise Exception(f"Error loading model from {filepath}:{e}")
-        
-#model=pickle.load(open("model.pkl","rb")) #rb- read binary mode
-
-def evaluation_model(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
-    try:
-        y_pred= model.predict(X_test)
-
-        accuracy= accuracy_score(y_test, y_pred)
-        precision= precision_score(y_test, y_pred)
-        recall= recall_score(y_test, y_pred)
-        f1score= f1_score(y_test, y_pred)
-
-        #storing data in json file
-        metrics_dict={
-            'accuracy':accuracy,
-            'precision':precision,
-            'recall': recall,
-            'f1_score':f1score
-        }
-        return metrics_dict
-    except Exception as e:
-        raise Exception(f"Error evaluating model: {e}")
-
-def save_metrics(metrics_dict: dict, filepath: str) -> None:
+def load_data(filepath : str) -> pd.DataFrame:
     try: 
-        with open('metrics.json','w') as file:
-            json.dump(metrics_dict, file, indent=4)
+         return pd.read_csv(filepath)
     except Exception as e:
-        raise Exception(f"Error saving metrics to {filepath}: {e}")
-    
-def main():
+        raise Exception(f"Error loading data from {filepath}: {e}")
+
+#data= pd.read_csv(r"C:\Users\lenovo\Documents\MSIS\Projects\ml-pipeline\water_potability.csv")
+
+def split_data(data: pd.DataFrame, test_size: float) -> tuple[pd.DataFrame, pd.DataFrame]:
     try:
-        test_data_path="./data/processed/test_processed.csv"
-        model_path ="model.pkl"
-        metrics_path = "metrics.json"
-        
-        test_data = load_data(test_data_path)
-        X_test, y_test =  prepare_data(test_data)
-        model = load_model(model_path)
-        metrics = evaluation_model(model, X_test, y_test)
-        save_metrics(metrics, metrics_path)
+        return train_test_split(data, test_size= test_size, random_state=42)
     except Exception as e:
-        raise Exception(f"An error occured: {e}")
+        raise ValueError(f"Error splitting data: {e}")
     
-if __name__=="__main__":
+#train_data, test_data = train_test_split(data, test_size= test_size, random_state=42)
+
+def save_data(df : pd.DataFrame,filepath : str) -> None:
+    try:
+         df.to_csv(filepath, index=False)
+    except Exception as e:
+        raise Exception(f"Error saving data to filepath {filepath}:{e}")
+
+def main():
+   data_filepath = r"C:\Users\lenovo\Documents\MSIS\Projects\ml-pipeline\water_potability.csv"
+   params_filepath = "params.yaml"
+   raw_data_path = os.path.join("data","raw")
+#data_path=os.path.join("data","raw")
+   try:
+        data = load_data(data_filepath)   
+        test_size = load_params(params_filepath)
+        train_data, test_data= split_data(data, test_size)
+
+        os.makedirs(raw_data_path)
+
+        save_data(train_data, os.path.join(raw_data_path,"train.csv"))
+        save_data(test_data, os.path.join(raw_data_path,"test.csv"))
+   except Exception as e:
+       raise Exception(f"An error occured: {e}")
+   
+if __name__ == "__main__":
     main()
-    
-    
-    
-    
