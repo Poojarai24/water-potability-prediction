@@ -9,16 +9,21 @@ stages:
       size: 2071
     params:
       params.yaml:
-        data_collection.test_size: 0.3
+        data_collection.test_size: 0.2
     outs:
     - path: data/raw
       hash: md5
-      md5: 97825bb768b4b66d70c59daed663063a.dir
+      md5: c0c2d65c14a603e91e029fda3c344a5c.dir
       size: 522262
       nfiles: 2
   pre-processing:
     cmd: python src/data/data_preparation.py
     deps:
+    - path: data/raw
+      hash: md5
+      md5: c0c2d65c14a603e91e029fda3c344a5c.dir
+      size: 522262
+      nfiles: 2
     - path: src/data/data_preparation.py
       hash: md5
       md5: fecd9a65956713c5fdb19b44ea473713
@@ -26,16 +31,16 @@ stages:
     outs:
     - path: data/processed
       hash: md5
-      md5: a92b8581128eb8dd5d16a84af7ae83c1.dir
-      size: 546215
+      md5: 09d7d1468d5c1e6739769af7e3154438.dir
+      size: 546137
       nfiles: 2
   model_building:
     cmd: python src/model/model_building.py
     deps:
     - path: data/processed
       hash: md5
-      md5: a92b8581128eb8dd5d16a84af7ae83c1.dir
-      size: 546215
+      md5: 09d7d1468d5c1e6739769af7e3154438.dir
+      size: 546137
       nfiles: 2
     - path: src/model/model_building.py
       hash: md5
@@ -47,21 +52,21 @@ stages:
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: 7f7770c84b5af46bad9b52611bedaf8c
-      size: 64986568
+      md5: d3dd870f9206c64710b34f0d084f7338
+      size: 73614308
   model_evaluation:
     cmd: python src/model/model_evaluation.py
     deps:
     - path: models/model.pkl
       hash: md5
-      md5: 7f7770c84b5af46bad9b52611bedaf8c
-      size: 64986568
+      md5: d3dd870f9206c64710b34f0d084f7338
+      size: 73614308
     - path: src/model/model_evaluation.py
       hash: md5
-      md5: 69d2417a724f061684448fb4afc81843
-      size: 2620
+      md5: 9e3547066cd1f44a79ead2160f043e50
+      size: 3352
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 3ff0b4abfa01ee3ef9563df8d8ee1152
-      size: 151
+      md5: 27a0f4f3b62ec055afb66991b82db218
+      size: 152
