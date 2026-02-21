@@ -12,13 +12,13 @@ def load_data(filepath : str) -> pd.DataFrame:
 # test_data= pd.read_csv('./data/raw/test.csv')
 
 #filling the missing value
-def fill_missing_with_median(df):
+def fill_missing_with_mean(df):
     try:
         for column in df.columns:
             if df[column].isnull().any():
-                median_value= df[column].median()
+                mean_value= df[column].mean()
                 #df[column].fillna(median_value, inplace=True)
-                df[column] = df[column].fillna(median_value)
+                df[column] = df[column].fillna(mean_value)
         return df
     except Exception as e:
         raise Exception(f"Error while filling missing values:{e}")
@@ -40,8 +40,8 @@ def main():
         train_data = load_data(os.path.join(raw_data_path, "train.csv"))
         test_data = load_data(os.path.join(raw_data_path, "test.csv"))
         
-        train_processed_data=fill_missing_with_median(train_data)
-        test_processed_data=fill_missing_with_median(test_data) 
+        train_processed_data=fill_missing_with_mean(train_data)
+        test_processed_data=fill_missing_with_mean(test_data) 
         
     #data_path=os.path.join("data","processed")
         os.makedirs(processed_data_path)
