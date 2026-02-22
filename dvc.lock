@@ -5,8 +5,8 @@ stages:
     deps:
     - path: src/data/data_collection.py
       hash: md5
-      md5: 78175572ee3397484351770a5caa03bf
-      size: 2071
+      md5: e5d3208ab013c82e185ff776366fd3c5
+      size: 2014
     params:
       params.yaml:
         data_collection.test_size: 0.2
@@ -26,47 +26,47 @@ stages:
       nfiles: 2
     - path: src/data/data_preparation.py
       hash: md5
-      md5: fecd9a65956713c5fdb19b44ea473713
-      size: 1973
+      md5: 399fb9a823bb7c94361d6491a8852122
+      size: 1903
     outs:
     - path: data/processed
       hash: md5
-      md5: 09d7d1468d5c1e6739769af7e3154438.dir
-      size: 546137
+      md5: e34c84b2d0f2a75442271cd6c5779b7c.dir
+      size: 546895
       nfiles: 2
   model_building:
     cmd: python src/model/model_building.py
     deps:
     - path: data/processed
       hash: md5
-      md5: 09d7d1468d5c1e6739769af7e3154438.dir
-      size: 546137
+      md5: e34c84b2d0f2a75442271cd6c5779b7c.dir
+      size: 546895
       nfiles: 2
     - path: src/model/model_building.py
       hash: md5
-      md5: 2a300e78af122918056bc6aca0bebffe
-      size: 2569
+      md5: 0798e5bf7f0227dd5ca8a1d13585c41d
+      size: 2490
     params:
       params.yaml:
         model_building.n_estimators: 1000
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: d3dd870f9206c64710b34f0d084f7338
-      size: 73614308
+      md5: 0d4ad14387bcfd9ab5b8cbf61c5ce329
+      size: 73589668
   model_evaluation:
     cmd: python src/model/model_evaluation.py
     deps:
     - path: models/model.pkl
       hash: md5
-      md5: d3dd870f9206c64710b34f0d084f7338
-      size: 73614308
+      md5: 0d4ad14387bcfd9ab5b8cbf61c5ce329
+      size: 73589668
     - path: src/model/model_evaluation.py
       hash: md5
-      md5: 9e3547066cd1f44a79ead2160f043e50
-      size: 3352
+      md5: 8b1e356f0e3570713679676659c94ccf
+      size: 5286
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 27a0f4f3b62ec055afb66991b82db218
-      size: 152
+      md5: 2c235f11f5f57dd1ea4d80f14dae2a0f
+      size: 150

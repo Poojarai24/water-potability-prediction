@@ -2,26 +2,23 @@ import numpy as np
 import pandas as pd
 import pickle
 import json
-import mlflow
 import yaml
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-from mlflow import log_metric, log_param, log_artifact
 import mlflow.sklearn
 import dagshub
 import mlflow
 from mlflow.models import infer_signature
-from dvclive import live
 
 # Initialize DagsHub for experiment tracking
 dagshub.init(repo_owner='Poojarai24', repo_name='water-potability-prediction', mlflow=True)
 
-# Set the experiment name in MLflow
-mlflow.set_experiment("DVC PIPELINE ")
-
 # Set the tracking URI for MLflow to log the experiment in DagsHub
 mlflow.set_tracking_uri("https://dagshub.com/Poojarai24/water-potability-prediction.mlflow")
+
+# Set the experiment name in MLflow
+mlflow.set_experiment("DVC PIPELINE")
 
 def load_data(filepath  : str) -> pd.DataFrame:
     try:
@@ -91,6 +88,7 @@ def evaluation_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name:
         plt.title(f"Confusion Matrix for {model_name}")
         cm_path = f"confusion_matrix_{model_name.replace(' ', '_')}.png"
         plt.savefig(cm_path)
+        plt.close()
         
         # Log confusion matrix artifact
         mlflow.log_artifact(cm_path)   
@@ -115,35 +113,40 @@ def save_metrics(metrics_dict: dict, metrics_path: str) -> None:
     
 def main():
     try:
-        test_data_path="./data/processed/test_processed.csv"
-        model_path ="models/model.pkl"
+        test_data_path = "./data/processed/test_processed.csv"
+        model_path = "models/model.pkl"
         metrics_path = "reports/metrics.json"
-        model_name = "Best Model"
-        
+        model_name = "Best_Model"
+
         test_data = load_data(test_data_path)
-        X_test, y_test =  prepare_data(test_data)
+        X_test, y_test = prepare_data(test_data)
         model = load_model(model_path)
-        
-         # Start MLflow run
+
         with mlflow.start_run() as run:
+
             metrics = evaluation_model(model, X_test, y_test, model_name)
             save_metrics(metrics, metrics_path)
 
-            # Log artifacts
-            mlflow.log_artifact(model_path)
             mlflow.log_artifact(metrics_path)
-            
-            # Log the source code file
             mlflow.log_artifact(__file__)
 
-            signature = infer_signature(X_test,model.predict(X_test))
+            signature = infer_signature(X_test, model.predict(X_test))
 
-            mlflow.sklearn.log_model(model,"Best Model",signature=signature)
+            print("Logging MLflow model now...")
+            mlflow.sklearn.log_model(
+                model,
+                name=model_name,
+                signature=signature
+            )
+            mlflow.set_tag("registered_model_name", model_name)
+            print("Current Run ID:", run.info.run_id)
 
-            #Save run ID and model info to JSON File
-            run_info = {'run_id': run.info.run_id, 'model_name': "Best Model"}
-            reports_path = "reports/run_info.json"
-            with open(reports_path, 'w') as file:
+            run_info = {
+                'run_id': run.info.run_id,
+                'model_name': model_name
+            }
+
+            with open("reports/run_info.json", "w") as file:
                 json.dump(run_info, file, indent=4)
     except Exception as e:
         raise Exception(f"An error occured: {e}")
